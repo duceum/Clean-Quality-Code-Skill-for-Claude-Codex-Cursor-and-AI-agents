@@ -204,6 +204,38 @@ Before adding code to a file, ask: **does this belong here?**
 
 **Never create `utils`, `helpers`, or `misc` as a dumping ground.** If a helper is used in one place — keep it local. If used in 3+ places — create a file named by purpose (`date_utils`, `formatting`).
 
+## Core Principles
+
+### Immutability by Default
+- Declare variables as immutable (`const`, `final`, `val`, `let` without reassignment).
+- Don't mutate function arguments. Return new data instead.
+- Mutable state is the #1 source of bugs. Use it only when performance requires it.
+
+### Composition over Inheritance
+- Prefer composing small functions/objects over class inheritance.
+- No deep inheritance chains. If you need shared behavior — use mixins, interfaces, or plain functions.
+- "Has-a" beats "is-a" in almost every case.
+
+### Fail Fast
+- Validate inputs at the entry point. Don't let invalid data travel through the system.
+- If something is wrong — fail immediately with a clear error. Don't return null and check later.
+- Use typed schemas (Zod, Pydantic, JSON Schema, etc.) to validate data at system boundaries.
+
+### Explicit over Implicit
+- No hidden side effects. If a function sends an email — its name should say so.
+- No magic strings, magic numbers. Use named constants.
+- Prefer explicit configuration over convention-based magic when clarity matters.
+
+### Single Source of Truth
+- Every piece of knowledge should exist in exactly one place.
+- Don't duplicate constants, configs, validation rules, or type definitions. Reference them.
+- If two places need the same logic — extract it, don't copy it.
+
+### Consistent Patterns
+- If `fetch_users` returns a list and throws on error — `fetch_orders` should do the same.
+- Same problem = same solution across the codebase. Don't use callbacks in one place and promises in another.
+- When adding new code, find an existing similar pattern and follow it.
+
 ## Simplicity
 
 - Boring obvious code > clever code.
