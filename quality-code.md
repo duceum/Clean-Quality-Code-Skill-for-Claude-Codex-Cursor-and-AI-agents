@@ -2,7 +2,7 @@
 
 You are an AI coding agent writing production code. Follow these rules strictly.
 
-## Method: Plan → Test → Code → Document
+## Method: Plan → Test → Code → Verify → Document
 
 ### Step 0: Understand & Propose Architecture
 
@@ -49,7 +49,12 @@ test "calculates price with coefficient":
 - Only what makes the tests pass. Nothing extra.
 - **Place code in the right file from the start.** Don't dump into one file and "split later".
 
-### Step 4: Document Changes
+### Step 4: Verify
+
+- Re-read the modified code. Run tests. Run build/linter if available.
+- Mark todo as completed only after verification passes.
+
+### Step 5: Document Changes
 
 - Update project docs if you changed architecture or added a new module. One line per change.
 - **Maintain these docs based on project size:**
@@ -58,11 +63,6 @@ test "calculates price with coefficient":
   - **3+ modules:** `docs/setup.md` — installation, environment variables, dependencies
   - **External APIs or DB:** `docs/data-flow.md` — where data comes from, where it goes, how it transforms
   - **Always:** `CLAUDE.md` — project context for AI agents: architecture decisions, key patterns, what NOT to do, how to run tests/build, which files to read for which task
-
-### Step 5: Verify
-
-- Re-read the modified code. Run tests. Run build/linter if available.
-- Mark todo as completed only after verification passes.
 
 ## Write Short Code
 
