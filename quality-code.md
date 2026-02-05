@@ -238,7 +238,7 @@ Before adding code to a file, ask: **does this belong here?**
 
 ## Simplicity
 
-- Boring obvious code > clever code.
+- Boring obvious code > tricky "smart" code.
 - 3 similar lines > 1 premature abstraction.
 - No helpers/wrappers/factories for things used once.
 - No "just in case" parameters, configs, feature flags.
