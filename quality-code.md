@@ -39,24 +39,12 @@ Example plan for "add Stripe payments" (framework-agnostic):
 - Tests force you to design clean interfaces — if it's hard to test, the design is wrong.
 
 ```
-# Write the test FIRST — in any language:
+# Write this FIRST:
+test "calculates price with coefficient":
+    result = calculate_price(base=100, coefficient=0.7)
+    assert result == 70
 
-# Python (pytest)
-def test_calculate_price_basic():
-    assert calculate_price(base=100, coefficient=0.7) == 70
-
-# TypeScript (Jest/Vitest)
-test('calculates price with coefficient', () => {
-    expect(calculatePrice({ base: 100, coefficient: 0.7 })).toBe(70);
-});
-
-# Go
-func TestCalculatePrice(t *testing.T) {
-    got := CalculatePrice(100, 0.7)
-    if got != 70 { t.Errorf("got %v, want 70", got) }
-}
-
-# Then implement the function to make tests pass.
+# Then implement calculate_price to make the test pass.
 ```
 
 - If full TDD is overkill for the task — at minimum write tests immediately after the code, not "later".
@@ -107,21 +95,14 @@ for item in items:
     if item.is_active:
         result.append(item.name)
 
-# GOOD — use language idioms
-# Python:     [item.name for item in items if item.is_active]
-# JS/TS:      items.filter(i => i.isActive).map(i => i.name)
-# Ruby:       items.select(&:active?).map(&:name)
-# Go:         no shortcut — explicit loop is idiomatic and that's fine
+# GOOD — use the language's idiomatic way to filter + map
+result = items.filter(active).map(name)
 
 # BAD — unnecessary branching
 if user.name != null { result = user.name } else { result = "Anonymous" }
 
-# GOOD — use language's null-coalescing
-# JS/TS:      user.name ?? "Anonymous"
-# Python:     user.name or "Anonymous"
-# Swift:      user.name ?? "Anonymous"
-# Kotlin:     user.name ?: "Anonymous"
-# Go:         no operator — if/else is fine, keep it short
+# GOOD — use null-coalescing operator (or equivalent idiom)
+result = user.name ?? "Anonymous"
 ```
 
 ## Architecture: File Organization
@@ -190,19 +171,15 @@ Split when a file starts doing two distinct jobs:
 - **Inject dependencies.** Don't hardcode clients/DB inside functions. Pass them as parameters or via constructor.
 
 ```
-# BAD — hardcoded dependency, impossible to test without real API
-function processPayment(amount) {
-    const client = new StripeClient(process.env.STRIPE_KEY);
-    return client.charge(amount);
-}
+# BAD — hardcoded dependency, impossible to test
+process_payment(amount):
+    client = new StripeClient(ENV.STRIPE_KEY)
+    return client.charge(amount)
 
 # GOOD — dependency injected, testable with mock
-function processPayment(amount, stripeClient) {
-    return stripeClient.charge(amount);
-}
+process_payment(amount, stripe_client):
+    return stripe_client.charge(amount)
 ```
-
-This pattern applies to any language: pass dependencies as arguments or via constructor, don't instantiate them inside business logic.
 
 - **Separate I/O from logic.** Read data → process (pure) → write result. The "process" part should be testable without any I/O.
 - **Small functions = small tests.** If a test needs 20 lines of setup — the function does too much.
@@ -211,8 +188,7 @@ This pattern applies to any language: pass dependencies as arguments or via cons
 ### Test File Organization
 
 - Test directory mirrors source directory structure.
-- One test file per source file. Follow language convention for naming:
-  - Python: `test_{source}.py` | JS/TS: `{source}.test.ts` | Go: `{source}_test.go`
+- One test file per source file. Follow the language's naming convention for tests.
 - Shared fixtures/helpers in one place — not duplicated across tests.
 - Test names describe behavior: `rejects_negative_amount`, not `test_3`.
 
@@ -262,7 +238,7 @@ Before adding code to a file, ask: **does this belong here?**
 ## Error Handling
 
 - Handle errors at boundaries (user input, APIs, I/O). Trust internal code.
-- Specific error types, not generic `Exception` / `Error` / `throw new Error("fail")`.
+- Specific error types, not generic catch-all errors.
 - Error messages: what happened + what was expected + what to do about it.
 - Don't silently swallow errors. If you catch — either handle meaningfully or re-throw.
 - **Catch at the right level.** Don't wrap every function in try/catch. Catch where you can actually do something useful (retry, fallback, show error to user). Let errors bubble up through pure logic.
@@ -271,12 +247,9 @@ Before adding code to a file, ask: **does this belong here?**
 ## Async/Await
 
 - **Don't mix sync and async.** If a client is async — all callers are async. Don't wrap async in sync or vice versa.
-- **Parallel when independent.** Independent calls → run concurrently, not sequentially.
-  - Python: `asyncio.gather(*tasks, return_exceptions=True)`
-  - JS/TS: `Promise.all([...])` or `Promise.allSettled([...])`
-  - Go: `errgroup.Group`
+- **Parallel when independent.** Independent calls → run concurrently (gather, Promise.all, errgroup, etc.), not sequentially.
 - **Sequential when dependent.** If B needs the result of A — await A first, then B.
-- **Always handle partial failures** from parallel calls. `return_exceptions=True` (Python) or `Promise.allSettled` (JS) — then check each result.
+- **Always handle partial failures** from parallel calls. Use the language's mechanism to collect errors without aborting all tasks.
 - **Never block the event loop** with CPU-heavy or sync I/O code inside async functions.
 
 ## API Clients: Timeouts & Retries
@@ -285,7 +258,7 @@ Before adding code to a file, ask: **does this belong here?**
 - **Retry only idempotent operations.** GET, PUT, DELETE — safe to retry. POST — only with an idempotency key.
 - **Retry only transient errors.** 429, 502, 503, 504, timeouts, network errors. Never retry 400, 401, 403, 404.
 - **Exponential backoff.** 1s → 2s → 4s. Max 3 attempts. That's enough for most cases.
-- **One retry helper for the whole project.** Don't copy-paste retry logic into every client. Write it once or use a library (`tenacity` for Python, `p-retry` for JS, go-retryablehttp for Go).
+- **One retry helper for the whole project.** Don't copy-paste retry logic into every client. Write it once or use a well-known retry library for your language.
 
 ## Logging
 
