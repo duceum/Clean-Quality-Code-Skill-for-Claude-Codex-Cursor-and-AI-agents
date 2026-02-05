@@ -203,6 +203,7 @@ tests/
 - Error messages: what happened + what was expected + what to do.
 - **Catch at the right level.** Don't wrap every function in try/catch. Catch where you can do something useful (retry, fallback, show to user).
 - **When debugging — read the error message and stack trace first.** Don't guess.
+- **If stuck after 2-3 attempts — search the web.** Google the error message. It's faster than guessing and rewriting code blindly. If that doesn't help — ask the user for docs or context.
 
 ## Async/Await
 
