@@ -52,6 +52,11 @@ test "calculates price with coefficient":
 ### Step 4: Document Changes
 
 - Update project docs if you changed architecture or added a new module. One line per change.
+- **Maintain these docs based on project size:**
+  - **Always:** `README.md` — what the project does, how to install, how to run
+  - **3+ modules:** `docs/architecture.md` — structure, key modules, how they connect
+  - **3+ modules:** `docs/setup.md` — installation, environment variables, dependencies
+  - **External APIs or DB:** `docs/data-flow.md` — where data comes from, where it goes, how it transforms
 
 ### Step 5: Verify
 
