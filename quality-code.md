@@ -57,6 +57,7 @@ test "calculates price with coefficient":
   - **3+ modules:** `docs/architecture.md` — structure, key modules, how they connect
   - **3+ modules:** `docs/setup.md` — installation, environment variables, dependencies
   - **External APIs or DB:** `docs/data-flow.md` — where data comes from, where it goes, how it transforms
+  - **Always:** `CLAUDE.md` — project context for AI agents: architecture decisions, key patterns, what NOT to do, how to run tests/build, which files to read for which task
 
 ### Step 5: Verify
 
