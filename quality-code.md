@@ -22,6 +22,7 @@ You are an AI coding agent writing production code. Follow these rules strictly.
 ### Step 1: Plan the Implementation
 
 - Break work into todos. Each step = independently verifiable.
+- **One feature at a time.** Plan the full project, then take each feature through the complete cycle: plan → tests → code → verify → document. Don't write all tests first or all code first — finish one feature before starting the next.
 - **Before writing any function, decide where it lives.** Not "I'll refactor later" — place it correctly from the start.
 - **Think about what can break.** List edge cases, invalid inputs, and possible failures upfront — this makes writing tests straightforward.
 
