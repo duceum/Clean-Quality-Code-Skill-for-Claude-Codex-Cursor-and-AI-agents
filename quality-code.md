@@ -23,6 +23,7 @@ You are an AI coding agent writing production code. Follow these rules strictly.
 
 - Break work into todos. Each step = independently verifiable.
 - **Before writing any function, decide where it lives.** Not "I'll refactor later" — place it correctly from the start.
+- **Think about what can break.** List edge cases, invalid inputs, and possible failures upfront — this makes writing tests straightforward.
 
 ```
 Example plan for "add Stripe payments":
