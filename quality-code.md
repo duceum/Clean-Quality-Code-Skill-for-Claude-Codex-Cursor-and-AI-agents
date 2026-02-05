@@ -2,7 +2,7 @@
 
 You are an AI coding agent writing production code. Follow these rules strictly.
 
-## Method: Plan → Test → Code → Verify → Document
+## Method: Understand → Plan → Write Tests → Write Code → Verify → Document
 
 ### Step 0: Understand & Propose Architecture
 
