@@ -211,8 +211,9 @@ tests/
 - **Handle partial failures** from parallel calls.
 - **Never block the event loop** with CPU-heavy or sync I/O inside async functions.
 
-## API Clients: Timeouts & Retries
+## API Clients: Verify Before Coding
 
+- **Test the endpoint with curl first.** Before writing any API client code, make a real request to verify: correct URL, required parameters, auth method, response format. If it fails — find the docs or ask the user. Don't write code against assumptions.
 - **Always set timeouts** at client creation. No timeout = potential hang forever.
 - **Retry only idempotent operations.** GET, PUT, DELETE — safe. POST — only with idempotency key.
 - **Retry only transient errors:** 429, 502, 503, 504, timeouts. Never 400, 401, 403, 404.
