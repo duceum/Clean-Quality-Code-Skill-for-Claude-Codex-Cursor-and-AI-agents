@@ -1,4 +1,4 @@
-# Clean Code Skill for AI Coding Agents
+# Quality Code and Clean Architecture Skill for Claude Code, Codex, Cursor and Other AI Agents
 
 Universal set of rules for AI coding agents that enforces production-quality coding standards across any language and project.
 
