@@ -6,7 +6,7 @@ Works with: **Claude Code** | **OpenAI Codex** | **Cursor** | **GitHub Copilot**
 
 ## What It Does
 
-Loads a set of rules that guide AI coding agents to:
+Enforces the **Plan → Test → Code → Document** workflow and guides AI coding agents to:
 
 - **Plan before coding** — understand the task, plan file structure, write tests first, then implement
 - **Write concise code** — use language idioms, eliminate boilerplate, remove dead code
