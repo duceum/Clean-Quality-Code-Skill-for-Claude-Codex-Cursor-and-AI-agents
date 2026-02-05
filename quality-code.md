@@ -4,26 +4,31 @@ You are an AI coding agent writing production code. Follow these rules strictly.
 
 ## Method: Plan → Test → Code → Document
 
-### Step 0: Understand
+### Step 0: Understand & Propose Architecture
 
 - **Read before writing.** Never change code you haven't read.
 - **Ask if unclear.** Don't guess requirements — clarify with the user.
-- Identify which layers and files are involved.
+- **For new projects or features — propose the project structure first.** Before writing any code, present to the user:
+  1. What framework/stack is being used (or should be used)
+  2. What the folder structure will look like
+  3. Where each piece of logic will live
+  4. What the entry point is
+- **Follow the framework's conventions.** If it's Next.js — use `app/` or `pages/`. If it's Django — use apps. If it's Express — use `routes/`. Don't invent your own structure when the framework has one.
+- **For existing projects — read the structure first** and follow established patterns. Don't introduce a new organization style.
 
-### Step 1: Plan the Structure
+### Step 1: Plan the Implementation
 
 - Break work into todos. Each step = independently verifiable.
 - **Before writing any function, decide where it lives.** Not "I'll refactor later" — place it correctly from the start.
-- Plan the file structure: which files will be created/modified, what each will contain.
-- If a new feature touches 3+ areas — sketch the architecture in todos first.
+- Plan which files will be created/modified and what each will contain.
 
 ```
-Example plan for "add Stripe payments":
-1. models/payment.py       — Payment, PaymentStatus dataclasses
-2. clients/stripe.py       — StripeClient: create_charge, get_balance, refund
-3. services/payments.py    — process_payment, validate_amount (business logic)
-4. tests/test_payments.py  — tests for services/payments.py
-5. main.py                 — wire new /pay command
+Example plan for "add Stripe payments" (framework-agnostic):
+1. src/models/payment       — Payment, PaymentStatus types/classes
+2. src/clients/stripe        — StripeClient: create_charge, get_balance, refund
+3. src/services/payments    — process_payment, validate_amount (business logic)
+4. tests/payments            — tests for services/payments
+5. entry point              — wire new /pay command or route
 ```
 
 ### Step 2: Write Tests First
@@ -33,15 +38,25 @@ Example plan for "add Stripe payments":
 - Start with the happy path, then add edge cases.
 - Tests force you to design clean interfaces — if it's hard to test, the design is wrong.
 
-```python
-# Write this FIRST:
+```
+# Write the test FIRST — in any language:
+
+# Python (pytest)
 def test_calculate_price_basic():
     assert calculate_price(base=100, coefficient=0.7) == 70
 
-def test_calculate_price_minimum():
-    assert calculate_price(base=100, coefficient=0.01, min_price=5) == 5
+# TypeScript (Jest/Vitest)
+test('calculates price with coefficient', () => {
+    expect(calculatePrice({ base: 100, coefficient: 0.7 })).toBe(70);
+});
 
-# Then implement calculate_price to make tests pass.
+# Go
+func TestCalculatePrice(t *testing.T) {
+    got := CalculatePrice(100, 0.7)
+    if got != 70 { t.Errorf("got %v, want 70", got) }
+}
+
+# Then implement the function to make tests pass.
 ```
 
 - If full TDD is overkill for the task — at minimum write tests immediately after the code, not "later".
@@ -62,9 +77,9 @@ def test_calculate_price_minimum():
 
 ```markdown
 ## Changes
-- Added `clients/stripe.py` — Stripe API client (charge, refund)
-- Added `services/payments.py` — payment processing logic
-- Added `models/payment.py` — Payment, PaymentStatus models
+- Added `src/clients/stripe` — Stripe API client (charge, refund)
+- Added `src/services/payments` — payment processing logic
+- Added `src/models/payment` — Payment, PaymentStatus types
 ```
 
 ### Step 5: Verify
@@ -85,59 +100,69 @@ def test_calculate_price_minimum():
 - Remove dead code, unused imports, unused variables immediately.
 - Prefer standard library over reinventing. Prefer builtins over imports.
 
-```python
-# BAD — verbose
+```
+# BAD — verbose loop where a one-liner works
 result = []
 for item in items:
     if item.is_active:
         result.append(item.name)
-return result
 
-# GOOD — concise
-return [item.name for item in items if item.is_active]
-```
+# GOOD — use language idioms
+# Python:     [item.name for item in items if item.is_active]
+# JS/TS:      items.filter(i => i.isActive).map(i => i.name)
+# Ruby:       items.select(&:active?).map(&:name)
+# Go:         no shortcut — explicit loop is idiomatic and that's fine
 
-```typescript
-// BAD — verbose
-let result: string;
-if (user.name !== undefined) {
-    result = user.name;
-} else {
-    result = "Anonymous";
-}
+# BAD — unnecessary branching
+if user.name != null { result = user.name } else { result = "Anonymous" }
 
-// GOOD — concise
-const result = user.name ?? "Anonymous";
+# GOOD — use language's null-coalescing
+# JS/TS:      user.name ?? "Anonymous"
+# Python:     user.name or "Anonymous"
+# Swift:      user.name ?? "Anonymous"
+# Kotlin:     user.name ?: "Anonymous"
+# Go:         no operator — if/else is fine, keep it short
 ```
 
 ## Architecture: File Organization
 
-### Start Flat, Split When It Hurts
+### Rule #1: Follow the Framework
 
-Don't create 6 folders on day one. Start simple, grow structure when complexity demands it.
+If the project uses a framework — **follow its conventions first**. Don't invent custom structure.
 
-### Phase 1: Small Project (up to ~10 files)
+| Framework | Follow its structure |
+|---|---|
+| Next.js | `app/` or `pages/`, `components/`, `lib/` |
+| Django | apps with `models.py`, `views.py`, `urls.py` |
+| Rails | `app/models/`, `app/controllers/`, `app/services/` |
+| Express/Fastify | `routes/`, `middleware/`, `controllers/` |
+| FastAPI | `routers/`, `schemas/`, `services/` |
+| Spring Boot | `controller/`, `service/`, `repository/`, `model/` |
+| Flutter | `lib/screens/`, `lib/widgets/`, `lib/services/` |
+| SwiftUI | follow Xcode groups convention |
 
-Keep it flat. One file per logical domain. No folders needed yet.
+If no framework or it doesn't dictate structure — use the generic structure below.
+
+### Rule #2: Source Code Goes in `src/`
+
+Keep the project root clean. Entry point and config at root, everything else in `src/` (or `lib/`, `app/` — whatever the ecosystem prefers).
 
 ```
 project/
-  main.py              — entry point, CLI wiring
-  config.py            — settings, env
-  models.py            — all data structures (while few)
-  payments.py          — payment logic + Stripe API calls (while it's one API)
-  notifications.py     — email/push logic
-  tests/
-    test_payments.py
-    test_notifications.py
+  src/                   — all source code lives here
+    models/              — data structures, types, schemas
+    services/            — business logic, use cases
+    clients/             — external API integrations (one file per API)
+    db/                  — database queries, repositories
+    routes/ or commands/ — HTTP routes or CLI commands
+  tests/                 — mirrors src/ structure
+  entry point            — main file at root or src/ (index.ts, main.py, main.go)
+  config                 — settings, env loading
 ```
 
-**Rules at this phase:**
-- Each file does one domain — can mix layers (API + logic) while it's all the same domain.
-- `models.py` can hold all models in one file — split by domain only when models become unrelated to each other.
-- No `utils.py` yet. Put helpers next to the code that uses them.
+**Don't dump source files in the project root.** Only entry point, config, and tooling configs (package.json, pyproject.toml, etc.) belong at root level.
 
-### Phase 2: When to Split
+### Rule #3: Split by Logic Type, Not by Size
 
 **Logic mixing matters more than line count.** A 400-line file with 30 similar model classes is OK. A 100-line file with API calls, business logic, and DB queries is not. But still — try to keep files under 500 lines. If a uniform file approaches that limit, look for a natural seam to split by subdomain.
 
@@ -145,56 +170,39 @@ Split when a file starts doing two distinct jobs:
 
 | Sign | Action |
 |---|---|
-| File has API calls AND business logic | Extract API calls → `clients/{api}.py` |
-| File has 5+ data classes | Extract → `models/{domain}.py` |
-| File has DB queries AND business logic | Extract queries → `db/{domain}.py` |
-| File has 3+ CLI commands | Extract → `commands/{group}.py` |
-| Same helper used in 3+ files | Extract → `utils/{purpose}.py` |
+| File has API calls AND business logic | Extract API calls → `clients/{api_name}` |
+| File has 5+ unrelated data types | Extract → `models/{domain}` |
+| File has DB queries AND business logic | Extract queries → `db/{domain}` |
+| File has 3+ CLI commands or routes | Extract → `commands/` or `routes/{group}` |
+| Same helper used in 3+ files | Extract → `utils/{purpose}` |
 
-**After splitting, the natural layers emerge:**
-
-```
-project/
-  main.py              — entry point only
-  config.py            — settings
-  models/
-    payment.py         — Payment, PaymentStatus
-    user.py            — User, UserProfile
-  services/
-    payments.py        — business logic (no HTTP, no SQL)
-  clients/
-    stripe.py          — Stripe HTTP calls only
-    sendgrid.py        — email HTTP calls only
-  db/
-    payments.py        — payment DB queries
-  tests/
-    test_payments.py
-    test_stripe.py
-```
-
-### Key Principles (any phase)
+### Key Principles
 
 - **One file = describable in one phrase.** If you need "and" — it's two files.
-- **Name by domain, not pattern:** `payments.py` (good) vs `manager.py` (bad), `stripe.py` (good) vs `api.py` (bad).
-- **Don't mix different external APIs in one file.** Stripe and SendGrid = two files, always.
-- **Flat > nested.** Max 2 directory levels. No `services/api/clients/http/base/`.
-- **No empty abstractions.** Don't create `__init__.py` / `index.ts` barrels until you have 4+ files in a directory.
+- **Name by domain, not pattern:** `payments` (good) vs `manager` (bad), `stripe` (good) vs `api` (bad).
+- **One external API = one file.** Stripe and SendGrid never share a file.
+- **Max 2-3 directory levels.** No `src/services/api/clients/http/base/`.
+- **No barrel files** (index re-exports) until a directory has 4+ files that external code imports from.
 
 ## Design for Testability
 
 - **Pure functions first.** Extract logic into pure functions (input → output, no side effects). Pure functions are trivially testable.
 - **Inject dependencies.** Don't hardcode clients/DB inside functions. Pass them as parameters or via constructor.
 
-```python
-# BAD — impossible to test without real Stripe
-def process_payment(amount):
-    client = stripe.Client(os.environ["STRIPE_KEY"])
-    return client.charge(amount)
-
-# GOOD — testable with mock
-def process_payment(amount, stripe_client):
-    return stripe_client.charge(amount)
 ```
+# BAD — hardcoded dependency, impossible to test without real API
+function processPayment(amount) {
+    const client = new StripeClient(process.env.STRIPE_KEY);
+    return client.charge(amount);
+}
+
+# GOOD — dependency injected, testable with mock
+function processPayment(amount, stripeClient) {
+    return stripeClient.charge(amount);
+}
+```
+
+This pattern applies to any language: pass dependencies as arguments or via constructor, don't instantiate them inside business logic.
 
 - **Separate I/O from logic.** Read data → process (pure) → write result. The "process" part should be testable without any I/O.
 - **Small functions = small tests.** If a test needs 20 lines of setup — the function does too much.
@@ -202,29 +210,23 @@ def process_payment(amount, stripe_client):
 
 ### Test File Organization
 
-```
-tests/
-  test_payments.py       — mirrors services/payments.py
-  test_stripe_client.py  — mirrors clients/stripe.py
-  test_models.py         — model validation tests
-  conftest.py            — shared fixtures (Python/pytest)
-```
-
-- One test file per source file. Name: `test_{source_file}.py` / `{source_file}.test.ts`.
-- Fixtures/helpers in `conftest.py` (pytest) or `setup.ts` — not duplicated across tests.
-- Test names describe behavior: `test_rejects_negative_amount`, not `test_payment_3`.
+- Test directory mirrors source directory structure.
+- One test file per source file. Follow language convention for naming:
+  - Python: `test_{source}.py` | JS/TS: `{source}.test.ts` | Go: `{source}_test.go`
+- Shared fixtures/helpers in one place — not duplicated across tests.
+- Test names describe behavior: `rejects_negative_amount`, not `test_3`.
 
 ## Proactive File Hygiene
 
 Before adding code to a file, ask: **does this belong here?**
 
-- If the file is `payments.py` and you're adding email logic — wrong file.
+- If the file is `payments` and you're adding email logic — wrong file.
 - If the file has only models and you're adding API logic — wrong file.
 - If the file has 20 similar functions and you're adding another similar one — that's fine, even if the file is long.
 
 **The rule is about logic type first, size second.** Uniform files can be long — but cap at ~500 lines. Past that, find a subdomain boundary and split.
 
-**Never create `utils.py`, `helpers.py`, or `misc.py` as a dumping ground.** If a helper is used in one place — keep it local. If used in 3+ places — create a file named by purpose (`date_utils.py`, `formatting.py`).
+**Never create `utils`, `helpers`, or `misc` as a dumping ground.** If a helper is used in one place — keep it local. If used in 3+ places — create a file named by purpose (`date_utils`, `formatting`).
 
 ## Simplicity
 
@@ -238,25 +240,33 @@ Before adding code to a file, ask: **does this belong here?**
 ## Naming
 
 - **What**, not **how**: `active_users`, not `filtered_list`.
-- Functions: verb + noun — `fetch_user`, `validate_input`.
-- Booleans: `is_`, `has_`, `can_` prefix.
-- Collections: plural — `users`, `prices`.
-- No abbreviations except universal ones (`url`, `id`, `http`).
+- **Functions/methods:** verb + noun — `fetch_user`, `validate_input`, `calculate_total`.
+- **Booleans:** `is_`, `has_`, `can_`, `should_` prefix — `is_valid`, `has_access`.
+- **Collections:** plural — `users`, `prices`, `order_items`.
+- **Constants:** UPPER_SNAKE in most languages — `MAX_RETRIES`, `DEFAULT_TIMEOUT`.
+- **Classes/types:** PascalCase, noun — `PaymentResult`, `UserProfile`. Never `PaymentManager` or `UserHelper`.
+- **Files/modules:** match the primary thing they export. File has `PaymentService` → name it `payment_service` or `paymentService`.
+- **Callbacks/handlers:** `on` + event — `on_click`, `on_payment_complete`, `handle_error`.
+- **Iterators:** meaningful name if the body is >1 line. Single letter (`i`, `x`) only for trivial one-liners.
+- No abbreviations except universal ones (`url`, `id`, `http`, `db`, `api`).
+- **When unsure** — longer and clear beats short and cryptic. `remaining_attempts` > `rem`.
 
 ## Functions
 
 - One function = one job.
-- Max 3-4 params. More → group into object/dataclass.
-- Return early, guard clauses at top, avoid nesting.
+- Max 3-4 params. More → group into an object/struct/dataclass.
+- Return early, guard clauses at top, avoid nesting deeper than 2-3 levels.
 - No side effects in pure computations. No computations in side-effect functions.
-- Keep functions short. If > 20 lines — probably should split.
+- If a function does two things that can be named separately — split it into two.
 
 ## Error Handling
 
-- Handle at boundaries (user input, APIs, I/O). Trust internal code.
-- Specific exceptions, not generic `Exception` / `Error`.
-- Messages: what happened + what was expected + what to do.
-- Don't silently swallow errors.
+- Handle errors at boundaries (user input, APIs, I/O). Trust internal code.
+- Specific error types, not generic `Exception` / `Error` / `throw new Error("fail")`.
+- Error messages: what happened + what was expected + what to do about it.
+- Don't silently swallow errors. If you catch — either handle meaningfully or re-throw.
+- **Catch at the right level.** Don't wrap every function in try/catch. Catch where you can actually do something useful (retry, fallback, show error to user). Let errors bubble up through pure logic.
+- **When debugging — read the error message and stack trace first.** Don't guess. Trace the actual execution path.
 
 ## Async/Await
 
@@ -293,8 +303,8 @@ Before adding code to a file, ask: **does this belong here?**
 - Don't refactor adjacent code.
 - Don't add comments/docstrings/types to unchanged code.
 - Don't reformat, rename, or "improve" existing code.
-- Don't convert print→logging, requests→httpx unless asked.
-- Don't add `__all__`, re-exports, barrel files unless project uses them.
+- Don't swap libraries or patterns (e.g. change HTTP client, logging framework) unless asked.
+- Don't add re-exports or barrel files unless the project already uses them.
 - Don't create README/docs unless asked.
 
 ## Security
