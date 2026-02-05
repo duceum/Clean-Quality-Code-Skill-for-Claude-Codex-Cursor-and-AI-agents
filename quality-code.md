@@ -157,6 +157,23 @@ Split when a file starts doing two distinct jobs:
 | File has 3+ CLI commands or routes | Extract → `commands/` or `routes/{group}` |
 | Same helper used in 3+ files | Extract → `utils/{purpose}` |
 
+### Rule #4: Business Logic Is the Core
+
+Business logic must not depend on external services, frameworks, or I/O. It takes data in, returns data out. Everything external (APIs, databases, file system, UI) connects to the business logic — not the other way around.
+
+```
+# BAD — business logic depends on external service
+calculate_shipping(order):
+    rates = http.get("https://shipping-api.com/rates")  # knows about HTTP
+    return pick_cheapest(order, rates)
+
+# GOOD — business logic is pure, caller provides data
+calculate_shipping(order, rates):
+    return pick_cheapest(order, rates)
+```
+
+This works at any scale: a 50-line script or a 500-file project. The business logic stays stable when you change databases, swap APIs, or switch frameworks.
+
 ### Key Principles
 
 - **One file = describable in one phrase.** If you need "and" — it's two files.
