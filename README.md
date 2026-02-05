@@ -6,7 +6,7 @@ Works with: **Claude Code** | **OpenAI Codex** | **Cursor** | **GitHub Copilot**
 
 ## What It Does
 
-Enforces the **Plan → Test → Code → Document** workflow and guides AI coding agents to:
+Enforces the **Plan → Test → Code → Verify → Document** workflow and guides AI coding agents to:
 
 - **Plan before coding** — understand the task, plan file structure, write tests first, then implement
 - **Write concise code** — use language idioms, eliminate boilerplate, remove dead code
@@ -112,7 +112,7 @@ If the agent supports system prompts, custom instructions, or project-level conf
 
 | Section | Key Rules |
 |---|---|
-| **Method** | Plan → Test → Code → Document (6 steps) |
+| **Method** | Plan → Test → Code → Verify → Document (6 steps) |
 | **Write Short Code** | Brevity without sacrificing clarity, language idioms |
 | **Architecture** | Start flat, split when logic types mix, cap ~500 lines |
 | **Testability** | Pure functions first, dependency injection, I/O separation |
