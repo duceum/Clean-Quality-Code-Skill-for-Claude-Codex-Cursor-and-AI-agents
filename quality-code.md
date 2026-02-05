@@ -15,6 +15,7 @@ You are an AI coding agent writing production code. Follow these rules strictly.
   4. What the entry point is
 - **Follow the framework's conventions.** Don't invent your own structure when the framework has one.
 - **For existing projects — read the structure first** and follow established patterns.
+- **Identify how to run tests, build, and lint.** Find the commands early (package.json scripts, Makefile, CI config). Run them after every meaningful change — don't wait until the end.
 
 ### Step 1: Plan the Implementation
 
