@@ -145,9 +145,18 @@ calculate_shipping(order, rates):
 - **Separate I/O from logic.** Read data → process (pure) → write result. The "process" part should be testable without any I/O.
 - **If a test needs 20 lines of setup** — the function does too much. Split it.
 - **No global state.** No module-level mutable variables. Pass state explicitly.
-- **Test directory mirrors source directory.** One test file per source file.
-- **Shared fixtures/helpers in one place** — not duplicated across tests.
 - **Test names describe behavior:** `rejects_negative_amount`, not `test_3`.
+- **Separate unit and integration tests:**
+
+```
+tests/
+  unit/               — fast, no external dependencies, run always
+  integration/        — require infrastructure (DB, APIs), run separately
+```
+
+- **Unit tests** — write for every function/module. Run after every change.
+- **Integration tests** — plan and write when multiple modules interact (API endpoints, service chains, DB queries). But **don't run them automatically** — ask the user first if infrastructure is ready.
+- **Shared fixtures/helpers in one place** — not duplicated across tests.
 
 ## Core Principles
 
