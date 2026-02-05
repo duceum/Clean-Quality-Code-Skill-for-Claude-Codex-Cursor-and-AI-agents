@@ -17,6 +17,7 @@ You are an AI coding agent writing production code. Follow these rules strictly.
 - **For existing projects — read the structure first** and follow established patterns.
 - **Identify how to run tests, build, and lint.** Find the commands early (package.json scripts, Makefile, CI config). Run them after every meaningful change — don't wait until the end.
 - **If the project uses a database — design the schema first.** Before writing any code, propose table/collection structure, relationships, and key fields to the user. Document the schema. Changing DB structure later is expensive — get it right upfront.
+- **List prerequisites before coding.** Tell the user upfront what's needed to run and test the project: create `.env` with which variables, which API keys to obtain, which services to set up. Don't let the user discover missing credentials mid-development.
 
 ### Step 1: Plan the Implementation
 
