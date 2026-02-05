@@ -52,7 +52,9 @@ mkdir -p .claude/commands
 cp quality-code.md .claude/commands/quality-code.md
 ```
 
-Then type `/quality-code` in any session.
+After install, the file works in two ways:
+- **As a slash command** — type `/quality-code` in any session to activate
+- **As a skill** — Claude Code automatically detects it and can apply the rules when relevant
 
 ### OpenAI Codex CLI
 
