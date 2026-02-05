@@ -138,6 +138,16 @@ calculate_shipping(order, rates):
 - **Max 2-3 directory levels.**
 - **Inject dependencies.** Pass clients/DB as parameters, don't instantiate inside business logic.
 
+## Testability
+
+- **Pure functions first.** Extract logic into pure functions (input → output, no side effects). Pure functions are trivially testable.
+- **Separate I/O from logic.** Read data → process (pure) → write result. The "process" part should be testable without any I/O.
+- **If a test needs 20 lines of setup** — the function does too much. Split it.
+- **No global state.** No module-level mutable variables. Pass state explicitly.
+- **Test directory mirrors source directory.** One test file per source file.
+- **Shared fixtures/helpers in one place** — not duplicated across tests.
+- **Test names describe behavior:** `rejects_negative_amount`, not `test_3`.
+
 ## Core Principles
 
 - **Immutability by default.** Declare variables as immutable. Don't mutate function arguments — return new data.
